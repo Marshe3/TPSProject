@@ -4,8 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/Character.h"
+#include "InputActionValue.h"
 #include "TPSPlayer.generated.h"
 
+class UCameraComponent;
+class UInputAction;
+class UInputMappingContext;
+class USpringArmComponent;
 
 UCLASS()
 class TPSPROJECT_API ATPSPlayer : public ACharacter
@@ -29,9 +34,43 @@ public:
 	
 	// 스프링 암 컴포넌트 선언
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class USpringArmComponent* springArmComp;
+	TObjectPtr<USpringArmComponent> springArmComp;
 	
 	// 카메라 컴포넌트 선언
 	UPROPERTY(VisibleAnywhere, Category = Camera)
-	class UCameraComponent* cameraComp;
+	TObjectPtr<UCameraComponent> cameraComp;
+	
+	// IMC 선택 필드 선언
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	TObjectPtr<UInputMappingContext> imc_TPS;
+	
+	// IA 선택 필드 선언
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	TObjectPtr<UInputAction> ia_LookUp;
+	
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	TObjectPtr<UInputAction> ia_Turn;
+	
+	
+	//  전후좌우 키보드 이동 IA 필드 선언
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	class UInputAction* ia_Move;
+	
+	// 이동 속도
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	float walkSpeed = 600.f;
+
+	// 이동 방향
+	FVector direction;
+	
+	// 전후좌우 이동 입력 함수 선언
+	void Move(const struct FInputActionValue& inputValue);
+	
+	// 상하 회전 입력 함수 선언
+	void LookUp(const FInputActionValue& inputValue);
+	
+	// 좌우 회전 입력 함수 선언
+	void Turn(const FInputActionValue& inputValue);
+	
+	
 };
