@@ -51,6 +51,9 @@ public:
 	UPROPERTY(EditDefaultsOnly, Category = Input)
 	TObjectPtr<UInputAction> ia_Turn;
 	
+	// 키보드로 점프 IA 필드 선언
+	UPROPERTY(EditDefaultsOnly, Category = Input)
+	class UInputAction* ia_jump;
 	
 	//  전후좌우 키보드 이동 IA 필드 선언
 	UPROPERTY(EditDefaultsOnly, Category = Input)
@@ -70,7 +73,10 @@ public:
 	void LookUp(const FInputActionValue& inputValue);
 	
 	// 좌우 회전 입력 함수 선언
-	void Turn(const FInputActionValue& inputValue);
+	void Turn(const FInputActionValue& inputValue); 
+	
+	//점프 입력 함수 선언
+	void InputJump(const struct FInputActionValue& inputValue);
 	
 	
 };
