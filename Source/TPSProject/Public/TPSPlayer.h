@@ -30,4 +30,8 @@ public:
 	// 스프링 암 컴포넌트 선언
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	class USpringArmComponent* springArmComp;
+	
+	// 카메라 컴포넌트 선언
+	UPROPERTY(VisibleAnywhere, Category = Camera)
+	class UCameraComponent* cameraComp;
 };
