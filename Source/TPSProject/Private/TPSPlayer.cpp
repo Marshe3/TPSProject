@@ -6,6 +6,7 @@
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "Camera/CameraComponent.h"
+#include "GameFramework/CharacterMovementComponent.h"
 #include "GameFramework/SpringArmComponent.h"
 
 
@@ -25,15 +26,17 @@ ATPSPlayer::ATPSPlayer()
 	cameraComp->SetupAttachment(springArmComp);
 	
 	// C++에서 BP에서의 옵션들 직접 수정하는 경우 아래처럼 해당 옵션 변수들을 직접 코드로 제어 가능
-	// springArmComp->bUsePawnControlRotation = true;
-	// cameraComp->bUsePawnControlRotation = false;
-	// bUseControllerRotationYaw = true;
+	springArmComp->bUsePawnControlRotation = true;
+	cameraComp->bUsePawnControlRotation = false;
+	bUseControllerRotationYaw = false;
+	GetCharacterMovement()->bOrientRotationToMovement = true;
 }
 
 // Called when the game starts or when spawned
 void ATPSPlayer::BeginPlay()
 {
 	Super::BeginPlay();
+	GetCharacterMovement()->MaxWalkSpeed = walkSpeed;
 	
 	// Enhanced Input 시스템이 IMC_TPS 사용하도록 설정
 	auto pc = Cast<APlayerController>(Controller);
@@ -51,18 +54,6 @@ void ATPSPlayer::BeginPlay()
 void ATPSPlayer::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-	
-	// 플레이어 이동 처리
-	//P결과 위치 = P0초기위 + v속도 * t 시간
-	direction = FTransform(GetControlRotation()).TransformFVector4(direction);
-	// FVector P0 = GetActorLocation();
-	// FVector vt = direction * walkSpeed * DeltaTime;
-	// FVector P = P0 + vt;
-	// SetActorLocation(P);
-	
-	// 언리얼엔진에서 제공하는 위 등속 운동을 구현한 함수 AddMovementInput()
-	AddMovementInput(direction);
-	direction = FVector::ZeroVector;
 }
 
 // Called to bind functionality to input
@@ -98,8 +89,15 @@ void ATPSPlayer::Turn(const FInputActionValue& inputValue)
 void ATPSPlayer::Move(const FInputActionValue& inputValue)
 {
 	FVector2D value = inputValue.Get<FVector2D>(); // 전달받는 2D 값
-	direction.X = value.X; // 전후
-	direction.Y = value.Y; // 좌우
+	
+	// 카메라의 좌우 회전(Yaw)만 사용해서 이동 방향을 만든다.
+	const FRotator ControlRot = GetControlRotation();
+	const FRotator YawRot(0.0f, ControlRot.Yaw, 0.0f);
+	const FVector Forward = FRotationMatrix(YawRot).GetUnitAxis(EAxis::X);
+	const FVector Right = FRotationMatrix(YawRot).GetUnitAxis(EAxis::Y);
+
+	AddMovementInput(Forward, value.X); // 전후
+	AddMovementInput(Right, value.Y); // 좌우
 }
 
 // 점프 입력에 따른 롤백 함수 구현
