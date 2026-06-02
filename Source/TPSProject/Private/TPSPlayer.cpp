@@ -25,11 +25,25 @@ ATPSPlayer::ATPSPlayer()
 	cameraComp = CreateDefaultSubobject<UCameraComponent>(TEXT("CameraComponent"));
 	cameraComp->SetupAttachment(springArmComp);
 	
-	// C++에서 BP에서의 옵션들 직접 수정하는 경우 아래처럼 해당 옵션 변수들을 직접 코드로 제어 가능
-	springArmComp->bUsePawnControlRotation = true;
-	cameraComp->bUsePawnControlRotation = false;
-	bUseControllerRotationYaw = false;
-	GetCharacterMovement()->bOrientRotationToMovement = true;
+	// // C++에서 BP에서의 옵션들 직접 수정하는 경우 아래처럼 해당 옵션 변수들을 직접 코드로 제어 가능
+	// springArmComp->bUsePawnControlRotation = true;
+	// cameraComp->bUsePawnControlRotation = false;
+	// bUseControllerRotationYaw = false;
+	// GetCharacterMovement()->bOrientRotationToMovement = true;
+	
+	// 총 스켈레탈메시 컴포넌트 등록
+	gunMeshComp = CreateDefaultSubobject<USkeletalMeshComponent>(TEXT("GunMeshComponent"));
+	// 캐릭터 메시 컴포넌트(GetMesh()) 부모에 부착
+	gunMeshComp->SetupAttachment(GetMesh());
+	// 스켈레탈 메시 데이터 동적로드
+	ConstructorHelpers::FObjectFinder<USkeletalMesh> TempGunMesh(TEXT("/Script/Engine.SkeletalMesh'/Game/Weapons/GrenadeLauncher/Meshes/SKM_GrenadeLauncher.SKM_GrenadeLauncher'"));
+	if (TempGunMesh.Succeeded())
+	{
+		// 해당 경로의 스켈레탈메시를 찾았다면, 메시 할당 + 임시위치 보정
+		gunMeshComp->SetSkeletalMesh(TempGunMesh.Object);
+		gunMeshComp->SetRelativeLocation(FVector(-14.0f, 52.0f, 120.0f));
+		
+	}
 }
 
 // Called when the game starts or when spawned

@@ -40,6 +40,10 @@ public:
 	UPROPERTY(VisibleAnywhere, Category = Camera)
 	TObjectPtr<UCameraComponent> cameraComp;
 	
+	// 총 스켈레탈 메시 컴포넌트 선언
+	UPROPERTY(VisibleAnywhere, Category = "GetMesh")
+	class USkeletalMeshComponent* gunMeshComp;
+	
 	// IMC 선택 필드 선언
 	UPROPERTY(EditDefaultsOnly, Category = Input)
 	TObjectPtr<UInputMappingContext> imc_TPS;
