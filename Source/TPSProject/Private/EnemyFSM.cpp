@@ -32,6 +32,13 @@ void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 {
 	Super::TickComponent(DeltaTime, TickType, ThisTickFunction);
 
+	// [DEBUG] 현재 상태를 화면에 표시
+	if (GEngine)
+	{
+		FString logMsg = UEnum::GetValueAsString(mState);
+		GEngine->AddOnScreenDebugMessage(-1, 0.f, FColor::Cyan, logMsg);
+	}
+	
 	// 현재 상태에 따라 해당 함수만 실행 - FSM
 	switch (mState)
 	{
@@ -46,7 +53,16 @@ void UEnemyFSM::TickComponent(float DeltaTime, ELevelTick TickType, FActorCompon
 // 추적 상태 - 플레이어 방향으로 이동, 공격 범위 진입시 공격 상태로 전환
 void UEnemyFSM::IdleState()
 {
+	// 시간 누적
+	currentTime += GetWorld()->GetDeltaSeconds();
 	
+	if (currentTime > idleDelayTime)
+	{
+		// Move 상태로 전환
+		mState = EEnemyState::Move;
+		// 경과 시간 초기화
+		currentTime = 0.f;
+	}
 }
 
 // 추적 상태 - 플레이어 방향으로 이동, 공격 범위 진입 시 공격 상태로 전환
