@@ -76,5 +76,10 @@ public:
 	int32 hp = 3;
 	
 	// 피격 대기시간 (경직)
-	UPROPERTY(EditDefaultsOnly, Category = FSM)float damageDelayTime= 1.f;
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite, Category = FSM)
+	float damageDelayTime= 1.f;
+	
+	// 아래로 사라지는 속도
+	UPROPERTY(EditDefaultsOnly,BlueprintReadWrite, Category = FSM)
+	float dieTime = 40.f;
 };

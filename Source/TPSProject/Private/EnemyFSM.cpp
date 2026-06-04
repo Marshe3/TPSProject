@@ -2,8 +2,7 @@
 
 
 #include "EnemyFSM.h"
-
-#include "AudioMixerBlueprintLibrary.h"
+#include "Components/CapsuleComponent.h"
 #include "Enemy.h"
 #include "TPSPlayer.h"
 #include "Kismet/GameplayStatics.h"
@@ -134,11 +133,22 @@ void UEnemyFSM::OnDamageProcess(){
 	else
 	{
 		mState = EEnemyState::Die;
+		// 캡슐 콜리전 비활성화
+		me->GetCapsuleComponent()->SetCollisionEnabled(ECollisionEnabled::NoCollision);
 	}
 }
 
 // 죽을 상태 - 사망 처리(종착 상태, 더이상 전이 없음)
 void UEnemyFSM::DieState()
 {
+	// 아래로 떨어트리기
+	FVector P0 = me->GetActorLocation();
+	FVector vt = FVector::DownVector * dieTime * GetWorld()->GetDeltaSeconds();
+	FVector P = P0 + vt;
+	me->SetActorLocation(P);
 	
+	if (P.Z < -200.f)
+	{
+		me->Destroy();
+	}
 }
