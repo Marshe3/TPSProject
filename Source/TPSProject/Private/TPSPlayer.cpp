@@ -4,6 +4,7 @@
 #include "TPSPlayer.h"
 
 #include "Bullet.h"
+#include "EnemyFSM.h"
 #include "EnhancedInputComponent.h"
 #include "EnhancedInputSubsystems.h"
 #include "NiagaraFunctionLibrary.h"
@@ -207,6 +208,14 @@ void ATPSPlayer::InputFire(const FInputActionValue& inputValue)
 			
 			// 타격 위치에 Niagara 이펙트 스폰
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), bulletEffectFactory, hitResult.ImpactPoint);
+			
+			// 적 피격 처리 - FSM 컴포넌트의 OnDamageProcess() 호출
+			auto enemy = hitResult.GetActor()->GetDefaultSubobjectByName(TEXT("FSM"));
+			if (enemy)
+			{
+				auto enemyFSM = Cast<UEnemyFSM>(enemy);
+				enemyFSM->OnDamageProcess();
+			}
 			
 			// 타격 물체에 물리 엔진 적용
 			UPrimitiveComponent* hitComp = hitResult.GetComponent();
