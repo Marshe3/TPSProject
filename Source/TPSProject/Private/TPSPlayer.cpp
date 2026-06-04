@@ -92,6 +92,12 @@ void ATPSPlayer::BeginPlay()
 	
 	// 스나이퍼 UI 위젯 인스턴스 생성 (화면에 보이기 위해서는 AddTOViewport() 호출시 등장)
 	sniperUI = CreateWidget(GetWorld(), sniperUIFactory);
+	// 일반 조준 크로스헤어 UI 위젯 인스턴스 생성 -> AddViewport로 호출
+	crosshairUI = CreateWidget(GetWorld(), crosshairUIFactory);
+	if (crosshairUI)
+	{
+		crosshairUI->AddToViewport();
+	}
 }
 
 // Called every frame
@@ -199,6 +205,22 @@ void ATPSPlayer::InputFire(const FInputActionValue& inputValue)
 			
 			// 타격 위치에 Niagara 이펙트 스폰
 			UNiagaraFunctionLibrary::SpawnSystemAtLocation(GetWorld(), bulletEffectFactory, hitResult.ImpactPoint);
+			
+			// 타격 물체에 물리 엔진 적용
+			UPrimitiveComponent* hitComp = hitResult.GetComponent();
+			if ( hitComp && hitComp->IsSimulatingPhysics() )
+			{
+				//  F = MA 방향 * 질량 * 가속도
+				// 1. 조준 방향 - 시작점에서 종료점 방향
+				FVector dir = (endPos - startPos).GetSafeNormal();
+				// 2. 날려버릴힘
+				FVector force = dir * hitComp->GetMass() * 20000.f;
+				// 3. 타격된 지점에 힘을 적용
+				// AddForce(F) - 무게중심에 힘을 적용 -> 회전없고, 평행이론
+				//  AddForceAtLocation(F,pos) - 특정 위치에 힘> 회전(토크)가 발생한다. ex: 모서리 맞으면 빙글빙글 돌면서 뒤로 밀림
+				hitComp->AddForceAtLocation(force, hitResult.ImpactPoint);
+			}
+			
 		}
 	}
 	
@@ -236,6 +258,10 @@ void ATPSPlayer::SniperZoom()
 		bSniperZoom = true;
 		sniperUI->AddToViewport(); // 조준경 UI 화면에 나타남
 		cameraComp->SetFieldOfView(45.f); // FOV 시야각을 좁혀서 줌인 효과
+		if (crosshairUI)
+		{
+			crosshairUI->RemoveFromParent(); //일반 조준선 가림
+		}
 		
 	}
 	else
@@ -244,6 +270,11 @@ void ATPSPlayer::SniperZoom()
 		bSniperZoom = false;
 		sniperUI->RemoveFromParent(); // 조준경 UI 제거
 		cameraComp->SetFieldOfView(90.f); // FOV 시야각 복구
+		if (crosshairUI)
+		{
+			crosshairUI->AddToViewport(); //일반 조준선 복구
+		}
+		
 
 	}
 	
